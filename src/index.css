@@ -1,0 +1,44 @@
+@import "tailwindcss";
+
+@layer base {
+  body {
+    font-family: 'Open Sans', Calibri, Carlito, system-ui, -apple-system, sans-serif;
+  }
+  
+  h1, h2, h3, .font-serif-story {
+    font-family: 'Open Sans', Calibri, Carlito, system-ui, -apple-system, sans-serif;
+    letter-spacing: -0.01em;
+  }
+
+  .font-title {
+    font-family: 'Open Sans', Calibri, Carlito, system-ui, -apple-system, sans-serif;
+    letter-spacing: -0.02em;
+  }
+}
+
+/* Custom parchment background pattern */
+.bg-parchment {
+  background-color: #faf6ee;
+  background-image: radial-gradient(#eadbc8 0.75px, transparent 0.75px), radial-gradient(#eadbc8 0.75px, #faf6ee 0.75px);
+  background-size: 30px 30px;
+  background-position: 0 0, 15px 15px;
+}
+
+/* Print styling for printing or saving to PDF */
+@media print {
+  body {
+    background: white !important;
+    color: black !important;
+  }
+
+  .no-print {
+    display: none !important;
+  }
+
+  .print-page {
+    page-break-after: always;
+    break-after: page;
+    box-shadow: none !important;
+    border: 1px solid #d4c3b3 !important;
+  }
+}

@@ -1,0 +1,6 @@
+{
+  "name": "Fairy Tale Studio",
+  "description": "A lightweight web app and AI story coach for Grade 9 Indonesian students learning English (CEFR A2-B1) to write and present fairy tales.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
