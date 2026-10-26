@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { Character, StoryData } from '../types';
 import { IndonesianToggle } from './IndonesianToggle';
+import { getDynamicIdeasFallback } from '../utils/coachFallback';
 import { 
   Compass, 
   Sparkles, 
@@ -121,28 +122,31 @@ export const Step1Ideas: React.FC<Step1IdeasProps> = ({
   const handleAskCoach = async () => {
     setIsAskingCoach(true);
     setCoachError('');
+    const payload = {
+      setting: setting === 'Other' ? customSetting : setting,
+      problem: problem === 'Other' ? customProblem : problem,
+      magicalElement: magicalElement === 'Other' ? customMagicalElement : magicalElement,
+      moralValue: moralValue === 'Other' ? customMoralValue : moralValue,
+      characters,
+    };
+
     try {
       const response = await fetch('/api/coach/ask-coach', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          setting: setting === 'Other' ? customSetting : setting,
-          problem: problem === 'Other' ? customProblem : problem,
-          magicalElement: magicalElement === 'Other' ? customMagicalElement : magicalElement,
-          moralValue: moralValue === 'Other' ? customMoralValue : moralValue,
-          characters,
-        }),
+        body: JSON.stringify(payload),
       });
 
       if (!response.ok) {
-        throw new Error('Coach service did not respond properly.');
+        throw new Error('Using built-in coach');
       }
 
       const data = await response.json();
       onUpdate({ coachIdeasFeedback: data });
-    } catch (err: any) {
-      console.error(err);
-      setCoachError('Could not connect to Coach Riko. Please check your network and try again.');
+    } catch {
+      // Seamlessly use fallback coach on static environments like GitHub Pages
+      const fallback = getDynamicIdeasFallback(payload);
+      onUpdate({ coachIdeasFeedback: fallback });
     } finally {
       setIsAskingCoach(false);
     }

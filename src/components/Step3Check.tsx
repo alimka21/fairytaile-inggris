@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { StoryData, StoryFeedback } from '../types';
 import { countWords } from '../utils/storage';
 import { IndonesianToggle } from './IndonesianToggle';
+import { getDynamicCheckFallback } from '../utils/coachFallback';
 import { 
   CheckSquare, 
   Sparkles, 
@@ -60,30 +61,34 @@ export const Step3Check: React.FC<Step3CheckProps> = ({
   const handleCheckStory = async () => {
     setIsChecking(true);
     setErrorMsg('');
+    const payload = {
+      orientation,
+      complication,
+      resolution,
+      setting,
+      moral: moralValue === 'Other' ? customMoralValue : moralValue,
+      characters,
+    };
+
     try {
       const response = await fetch('/api/coach/check-story', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          orientation,
-          complication,
-          resolution,
-          setting,
-          moral: moralValue === 'Other' ? customMoralValue : moralValue,
-          characters,
-        }),
+        body: JSON.stringify(payload),
       });
 
       if (!response.ok) {
-        throw new Error('Coach service encountered an error.');
+        throw new Error('Using built-in coach');
       }
 
       const data: StoryFeedback = await response.json();
       onUpdate({ checkFeedback: data });
       setRevealedAnswers({});
-    } catch (e: any) {
-      console.error(e);
-      setErrorMsg('Coach Riko could not check your story at this time. Please check connection and try again.');
+    } catch {
+      // Seamlessly use fallback coach on static environments like GitHub Pages
+      const fallback = getDynamicCheckFallback(payload);
+      onUpdate({ checkFeedback: fallback });
+      setRevealedAnswers({});
     } finally {
       setIsChecking(false);
     }

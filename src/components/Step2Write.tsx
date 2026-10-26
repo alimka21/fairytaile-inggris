@@ -2,6 +2,7 @@ import React, { useState, useRef } from 'react';
 import { StoryData, StuckHintResponse } from '../types';
 import { countWords } from '../utils/storage';
 import { IndonesianToggle } from './IndonesianToggle';
+import { getDynamicStuckFallback } from '../utils/coachFallback';
 import { 
   Feather, 
   Sparkles, 
@@ -131,30 +132,33 @@ export const Step2Write: React.FC<Step2WriteProps> = ({
   const handleImStuck = async () => {
     setIsGettingHint(true);
     setHintError('');
+    const payload = {
+      part: activeField,
+      orientationText: orientation,
+      complicationText: complication,
+      resolutionText: resolution,
+      characters: storyData.characters,
+      setting: storyData.setting,
+      problem: storyData.problem,
+    };
+
     try {
       const response = await fetch('/api/coach/stuck-hint', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          part: activeField,
-          orientationText: orientation,
-          complicationText: complication,
-          resolutionText: resolution,
-          characters: storyData.characters,
-          setting: storyData.setting,
-          problem: storyData.problem,
-        }),
+        body: JSON.stringify(payload),
       });
 
       if (!response.ok) {
-        throw new Error('Coach was unable to generate hint');
+        throw new Error('Using built-in coach');
       }
 
       const data = await response.json();
       setStuckHint(data);
-    } catch (e: any) {
-      console.error(e);
-      setHintError('Coach Riko could not be reached right now. Try again in a moment.');
+    } catch {
+      // Seamlessly use fallback coach on static environments like GitHub Pages
+      const fallback = getDynamicStuckFallback(payload);
+      setStuckHint(fallback);
     } finally {
       setIsGettingHint(false);
     }
